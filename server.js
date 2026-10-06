@@ -13,7 +13,22 @@ const PORT = process.env.PORT || 5000;
 const configuredOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map((origin) => origin.trim())
-  .filter(Boolean);
+  .filter(Boolean)
+  .map((origin) => {
+    try {
+      return new URL(origin).origin;
+    } catch {
+      return origin;
+    }
+  });
+const allowedOrigins = new Set([
+  "https://theme-app-five.vercel.app",
+  ...configuredOrigins,
+  ...[3000, 3001, 3002].flatMap((port) => [
+    `http://localhost:${port}`,
+    `http://127.0.0.1:${port}`,
+  ]),
+]);
 
 // ==============================
 // DATABASE
@@ -34,12 +49,7 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow every localhost / 127.0.0.1 port
-      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(
-        origin,
-      );
-
-      if (isLocalhost || configuredOrigins.includes(origin)) {
+      if (allowedOrigins.has(origin)) {
         return callback(null, true);
       }
 
@@ -65,6 +75,7 @@ app.use(
       "Authorization",
     ],
     credentials: true,
+    optionsSuccessStatus: 204,
   }),
 );
 
