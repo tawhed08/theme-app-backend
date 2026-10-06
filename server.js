@@ -106,6 +106,13 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Theme Studio API is healthy",
+  });
+});
+
 app.get("/api", (req, res) => {
   res.status(200).json({
     success: true,
